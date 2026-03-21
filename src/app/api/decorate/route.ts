@@ -23,13 +23,15 @@ export async function POST(req: NextRequest) {
       roomType,
       roomDescription,
       roomArchitecture,
+      roomDimensions,
+      propertyType,
     } = body;
 
     // MODE ANALYZE
     if (mode === "analyze") {
       const res = await openai.chat.completions.create({
         model: "gpt-4o",
-        max_tokens: 1200,
+        max_tokens: 1500,
         response_format: { type: "json_object" },
         messages: [
           {
@@ -37,31 +39,35 @@ export async function POST(req: NextRequest) {
             content: [
               {
                 type: "text",
-                text: `Tu es un architecte d'intérieur expert. Analyse ce plan d'appartement avec précision.
+                text: `Tu es un architecte d'intérieur expert. Analyse ce plan avec précision.
 
-Pour chaque pièce identifiée, extrait les caractéristiques ARCHITECTURALES RÉELLES visibles sur le plan :
-- Forme exacte de la pièce (rectangulaire, en L, carrée, trapézoïdale...)
-- Surface approximative en m² (déduite des proportions du plan)
-- Nombre de fenêtres et leur position (mur nord/sud/est/ouest, grande baie vitrée, fenêtre standard)
-- Hauteur de plafond probable (standard 2.5m, ou plafond haut si grande pièce)
-- Présence de niches, alcôves, colonnes, poutres apparentes
-- Orientation de la pièce et luminosité naturelle
-- Accès (portes doubles, simple, ouverte sur séjour...)
+ÉTAPE 1 - Type de bien : Détermine s'il s'agit d'un APPARTEMENT ou d'une MAISON en analysant la structure globale du plan (présence de plusieurs niveaux, jardin/terrasse, type de distribution, surface totale estimée).
+
+ÉTAPE 2 - Pour chaque pièce, extrait :
+- Forme exacte (rectangulaire, en L, carrée, trapézoïdale...)
+- Dimensions approximatives en m² ET en mètres linéaires (ex: "6m × 4m, 24m²")
+- Nombre de fenêtres et position (mur nord/sud/est/ouest, baie vitrée ou fenêtre standard)
+- Hauteur de plafond probable (standard 2.5m, ou haute si grande pièce)
+- Présence de niches, alcôves, colonnes, poutres
+- Orientation et luminosité naturelle
 
 Réponds UNIQUEMENT en JSON valide :
 {
+  "propertyType": "appartement",
+  "totalSurface": "surface totale estimée en m²",
+  "totalDescription": "Description globale du bien",
   "rooms": [
     {
       "name": "Salon",
       "type": "salon",
       "description": "description courte",
-      "architecture": "Pièce rectangulaire d environ 25m², double exposition avec 2 grandes fenêtres sur mur est et 1 baie vitrée au sud, plafond standard 2.5m, accès par porte double depuis l entrée"
+      "dimensions": "6m × 4m, 24m²",
+      "architecture": "Pièce rectangulaire de 24m² (6m×4m), 2 grandes fenêtres sur mur est et 1 baie vitrée au sud, plafond standard 2.5m, accès par porte double depuis l entrée"
     }
-  ],
-  "totalDescription": "Description globale de l appartement"
+  ]
 }
 
-Types valides : salon, cuisine, chambre, salle_de_bain, bureau, entree, dressing, wc, cellier, terrasse, autre`,
+Types valides : salon, cuisine, chambre, salle_de_bain, bureau, entree, dressing, wc, cellier, terrasse, garage, sejour, salle_a_manger, autre`,
               },
               {
                 type: "image_url",
@@ -78,6 +84,8 @@ Types valides : salon, cuisine, chambre, salle_de_bain, bureau, entree, dressing
       return NextResponse.json({
         success: true,
         rooms: parsed.rooms,
+        propertyType: parsed.propertyType || "appartement",
+        totalSurface: parsed.totalSurface,
         totalDescription: parsed.totalDescription,
       });
     }
@@ -90,18 +98,20 @@ Types valides : salon, cuisine, chambre, salle_de_bain, bureau, entree, dressing
         ? `ARCHITECTURE RÉELLE DE CETTE PIÈCE (respecter absolument) : ${roomArchitecture}. `
         : "";
 
+      const dimensionsContext = roomDimensions
+        ? `DIMENSIONS EXACTES : ${roomDimensions}. Adapter la perspective et la profondeur de champ à ces dimensions réelles. `
+        : "";
+
+      const propertyContext =
+        propertyType === "maison"
+          ? "Bien de type MAISON individuelle : volumes généreux, possibilité de poutres apparentes, esprit maison de famille. "
+          : "Bien de type APPARTEMENT : espace optimisé, lumineux, style urbain contemporain. ";
+
       const roomContext = roomDescription
         ? `Caractéristiques complémentaires : ${roomDescription}. `
         : "";
 
-      const prompt = `Photographie d'architecture intérieure professionnelle, rendu photoréaliste qualité magazine (Architectural Digest, Elle Décoration).
-
-${architectureContext}${roomContext}
-
-PIÈCE : ${roomName}.
-STYLE DE DÉCORATION : ${styleDesc}.
-
-Respecte impérativement la géométrie de la pièce : si 2 fenêtres sur un mur, montre-les ; si grande pièce lumineuse, traduis-le par une lumière naturelle abondante ; si petite surface, montre une perspective adaptée. Éclairage naturel réaliste depuis les fenêtres décrites. Mobilier adapté à la surface réelle. Vue grand angle depuis un coin montrant la volumétrie réelle. Pas de texte, pas de personnes, pas de logo.`;
+      const prompt = `Photographie d'architecture intérieure professionnelle, rendu photoréaliste qualité magazine (Architectural Digest, Elle Décoration). ${propertyContext}${architectureContext}${dimensionsContext}${roomContext}PIÈCE : ${roomName}. STYLE DE DÉCORATION : ${styleDesc}. Respecte impérativement la géométrie de la pièce : si 2 fenêtres sur un mur, montre-les toutes les 2 ; si grande pièce lumineuse, traduis par une lumière naturelle abondante ; si petite surface, perspective compacte adaptée. Éclairage naturel réaliste depuis les fenêtres décrites. Mobilier adapté à la surface réelle. Vue grand angle depuis un coin montrant la volumétrie réelle. Pas de texte, pas de personnes, pas de logo.`;
 
       const imageRes = await openai.images.generate({
         model: "dall-e-3",
@@ -146,4 +156,3 @@ Respecte impérativement la géométrie de la pièce : si 2 fenêtres sur un mur
     );
   }
 }
-
