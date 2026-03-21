@@ -28,6 +28,45 @@ const ROOM_ICONS: Record<string, string> = {
   cellier: "📦", terrasse: "🌿", autre: "🏠",
 };
 
+// Charge PDF.js depuis le CDN et retourne l instance globale
+async function loadPdfJs(): Promise<any> {
+  if (typeof (window as any).pdfjsLib !== "undefined") {
+    return (window as any).pdfjsLib;
+  }
+  await new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Impossible de charger PDF.js"));
+    document.head.appendChild(script);
+  });
+  const lib = (window as any).pdfjsLib;
+  lib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  return lib;
+}
+
+// Convertit la première page d un PDF en Blob PNG
+async function pdfToImageBlob(file: File): Promise<File> {
+  const pdfjsLib = await loadPdfJs();
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+  const scale = 2.5;
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const context = canvas.getContext("2d");
+  await page.render({ canvasContext: context, viewport }).promise;
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error("Conversion PDF échouée"));
+      resolve(new File([blob], file.name.replace(".pdf", ".png"), { type: "image/png" }));
+    }, "image/png");
+  });
+}
+
 export default function Home() {
   const [step, setStep] = useState<Step>("upload");
   const [planUrl, setPlanUrl] = useState<string>("");
@@ -35,6 +74,7 @@ export default function Home() {
   const [roomImages, setRoomImages] = useState<RoomImage[]>([]);
   const [error, setError] = useState<string>("");
   const [totalDescription, setTotalDescription] = useState<string>("");
+  const [uploadLabel, setUploadLabel] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = useCallback(() => {
@@ -43,6 +83,7 @@ export default function Home() {
     setRoomImages([]);
     setError("");
     setTotalDescription("");
+    setUploadLabel("");
   }, []);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,15 +92,21 @@ export default function Home() {
     setStep("uploading");
     setError("");
     try {
+      let imageFile = file;
+      if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+        setUploadLabel("Conversion PDF en image...");
+        imageFile = await pdfToImageBlob(file);
+      }
+      setUploadLabel("Chargement du plan...");
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", imageFile);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || "Erreur upload");
       setPlanUrl(data.url);
       setStep("uploaded");
     } catch (err: any) {
-      setError(err.message || "Erreur lors de l upload");
+      setError(err.message || "Erreur lors du chargement");
       setStep("error");
     }
   }, []);
@@ -79,7 +126,6 @@ export default function Home() {
       const rooms: { name: string; type: string; description: string; architecture?: string }[] = analyzeData.rooms || [];
       if (rooms.length === 0) throw new Error("Aucune pièce détectée dans ce plan");
       setTotalDescription(analyzeData.totalDescription || "");
-
       setRoomImages(rooms.map((r) => ({
         roomName: r.name,
         roomType: r.type,
@@ -89,7 +135,6 @@ export default function Home() {
         status: "pending",
       })));
       setStep("generating");
-
       for (let i = 0; i < rooms.length; i++) {
         setRoomImages((prev) =>
           prev.map((ri, idx) => (idx === i ? { ...ri, status: "generating" } : ri))
@@ -158,7 +203,7 @@ export default function Home() {
               <h2 className="text-3xl font-bold mb-3">
                 Visualisez chaque pièce <span className="text-[#C9A96E]">décorée</span>
               </h2>
-              <p className="text-zinc-400 text-lg">Importez votre plan VEFA — l IA génère une image par pièce fidèle à son architecture réelle</p>
+              <p className="text-zinc-400 text-lg">Importez votre plan VEFA — chaque pièce est analysée et décorée fidèlement à son architecture</p>
             </div>
             <div
               onClick={() => fileInputRef.current?.click()}
@@ -167,18 +212,18 @@ export default function Home() {
               {step === "uploading" ? (
                 <div className="flex flex-col items-center gap-4">
                   <Loader2 size={48} className="text-[#C9A96E] animate-spin" />
-                  <p className="text-zinc-300">Chargement du plan...</p>
+                  <p className="text-zinc-300">{uploadLabel || "Chargement..."}</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4">
                   <Upload size={48} className="text-zinc-600 group-hover:text-[#C9A96E] transition-colors" />
                   <div>
                     <p className="text-xl font-semibold mb-1">Déposez votre plan ici</p>
-                    <p className="text-zinc-500">PNG, JPG, WEBP — plan d architecte ou promoteur</p>
+                    <p className="text-zinc-500">PNG, JPG, WEBP ou <span className="text-[#C9A96E] font-medium">PDF</span> — plan d architecte ou promoteur</p>
                   </div>
                 </div>
               )}
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*,.pdf,application/pdf" onChange={handleFileChange} className="hidden" />
             </div>
           </div>
         )}
