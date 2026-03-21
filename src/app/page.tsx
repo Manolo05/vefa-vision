@@ -17,7 +17,7 @@ interface RoomImage {
 }
 
 const STYLES: { id: Style; label: string; icon: string; desc: string }[] = [
-  { id: "moderne", label: "Moderne", icon", ", desc: "Lignes épurées, tons neutres, accents design" },
+  { id: "moderne", label: "Moderne", icon: "■", desc: "Lignes épurées, tons neutres, accents design" },
   { id: "luxe", label: "Luxe", icon: "✦", desc: "Marbre, velours, dorures, cristal" },
   { id: "scandinave", label: "Scandinave", icon: "△", desc: "Bois clair, blanc, chaleureux" },
   { id: "minimaliste", label: "Minimaliste", icon: "○", desc: "Vide élégant, matériaux bruts" },
@@ -164,7 +164,7 @@ export default function Home() {
 
       const detectedType = analyzeData.propertyType || "appartement";
       setPropertyType(detectedType);
-      se setTotalSurface(analyzeData.totalSurface || "");
+      setTotalSurface(analyzeData.totalSurface || "");
       setTotalDescription(analyzeData.totalDescription || "");
 
       setRoomImages(
@@ -578,4 +578,4 @@ export default function Home() {
       </footer>
     </div>
   );
-        }
+    }
