@@ -5,71 +5,103 @@ export const maxDuration = 60;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const ROOM_PROMPTS: Record<string, string> = {
-  salon: "Photographie professionnelle d'un salon spacieux et lumineux, vue grand angle depuis un coin de la pièce, canapé design en angle, table basse élégante, lampadaire design, étagères décoratives, lumière naturelle par grandes fenêtres",
-  cuisine: "Photographie professionnelle d'une cuisine moderne et fonctionnelle, vue grand angle, plan de travail élégant, façades de qualité, îlot central ou bar si possible, éclairage LED sous les meubles, crédence design",
-  chambre: "Photographie professionnelle d'une chambre élégante et cosy, vue grand angle, lit king size avec tête de lit design, tables de nuit assorties, literie de qualité, lumière douce tamisée, dressing ou armoire design",
-  salle_de_bain: "Photographie professionnelle d'une salle de bain de standing, vue grand angle, douche à l'italienne avec paroi en verre, vasque posée sur meuble suspendu, carrelage haut de gamme, miroir avec éclairage intégré, robinetterie chromée",
-  bureau: "Photographie professionnelle d'un bureau élégant et fonctionnel, vue grand angle, bureau en bois massif, fauteuil ergonomique design, bibliothèque murale, grande fenêtre lumineuse, éclairage soigné",
-  entree: "Photographie professionnelle d'une entrée d'appartement élégante, vue grand angle, console design avec miroir, luminaire de caractère, sol en carrelage ou parquet haut de gamme, patère design, plante verte décorative",
-  default: "Photographie professionnelle d'une pièce d'intérieur de standing, vue grand angle depuis un coin, décoration contemporaine soignée, lumière naturelle, finitions haut de gamme",
-};
-
 const STYLE_MODIFIERS: Record<string, string> = {
-  moderne: "style moderne et contemporain, lignes épurées, palette tons neutres gris et blanc, accents dorés ou noirs, matériaux nobles",
-  luxe: "style luxueux et haut de gamme, velours, marbre, dorures, cristal, palette crème et or, sophistication maximale",
-  scandinave: "style scandinave chaleureux, bois clair naturel, blanc immaculé, textiles naturels laine et lin, plantes vertes, cocooning",
-  minimaliste: "style minimaliste japonais épuré, espace vide généreux, lumière zénithale, palette blanc et béton, une seule plante, rien de superflu",
+  moderne: "style contemporain haut de gamme, lignes épurées, palette neutre (blanc cassé, gris perle, taupe), matériaux nobles (béton ciré, verre, métal brossé)",
+  luxe: "style luxueux et haut de gamme, velours, marbre Calacatta, boiseries dorées, luminaires en cristal, palette ivoire et or champagne",
+  scandinave: "style scandinave hygge, bois clair de pin et chêne, textiles en lin et laine, palette blanc neige et beige chaud, plantes vertes",
+  minimaliste: "style minimaliste japonais wabi-sabi, vide architectural, palette monochrome gris clair, matériaux bruts (béton, bois cérusé, pierre)",
 };
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { mode, imageUrl, style = "moderne", roomName, roomType, roomDescription } = body;
+    const {
+      mode,
+      imageUrl,
+      style = "moderne",
+      roomName,
+      roomType,
+      roomDescription,
+      roomArchitecture,
+    } = body;
 
-    // ── MODE ANALYZE : identify rooms ──────────────────────────────
+    // MODE ANALYZE
     if (mode === "analyze") {
-      if (!imageUrl) return NextResponse.json({ error: "imageUrl requis" }, { status: 400 });
-
       const res = await openai.chat.completions.create({
         model: "gpt-4o",
-        max_tokens: 800,
+        max_tokens: 1200,
         response_format: { type: "json_object" },
-        messages: [{
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `Analyse ce plan d'appartement. Identifie chaque pièce distincte et réponds UNIQUEMENT en JSON valide avec ce format exact :
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Tu es un architecte d'intérieur expert. Analyse ce plan d'appartement avec précision.
+
+Pour chaque pièce identifiée, extrait les caractéristiques ARCHITECTURALES RÉELLES visibles sur le plan :
+- Forme exacte de la pièce (rectangulaire, en L, carrée, trapézoïdale...)
+- Surface approximative en m² (déduite des proportions du plan)
+- Nombre de fenêtres et leur position (mur nord/sud/est/ouest, grande baie vitrée, fenêtre standard)
+- Hauteur de plafond probable (standard 2.5m, ou plafond haut si grande pièce)
+- Présence de niches, alcôves, colonnes, poutres apparentes
+- Orientation de la pièce et luminosité naturelle
+- Accès (portes doubles, simple, ouverte sur séjour...)
+
+Réponds UNIQUEMENT en JSON valide :
 {
   "rooms": [
-    {"name": "Salon", "type": "salon", "description": "grande pièce lumineuse avec accès balcon"},
-    {"name": "Cuisine", "type": "cuisine", "description": "cuisine ouverte sur séjour"},
-    {"name": "Chambre 1", "type": "chambre", "description": "chambre principale avec placard"},
-    {"name": "Salle de bain", "type": "salle_de_bain", "description": "salle de bain avec baignoire"}
+    {
+      "name": "Salon",
+      "type": "salon",
+      "description": "description courte",
+      "architecture": "Pièce rectangulaire d environ 25m², double exposition avec 2 grandes fenêtres sur mur est et 1 baie vitrée au sud, plafond standard 2.5m, accès par porte double depuis l entrée"
+    }
   ],
-  "totalDescription": "Appartement 3 pièces de 65m², lumineux, disposition fonctionnelle."
+  "totalDescription": "Description globale de l appartement"
 }
-Types autorisés : salon, cuisine, chambre, salle_de_bain, bureau, entree, autre.
-Maximum 6 pièces. N'inclure que les pièces clairement identifiables.`
-            },
-            { type: "image_url", image_url: { url: imageUrl, detail: "high" } }
-          ]
-        }]
+
+Types valides : salon, cuisine, chambre, salle_de_bain, bureau, entree, dressing, wc, cellier, terrasse, autre`,
+              },
+              {
+                type: "image_url",
+                image_url: { url: imageUrl, detail: "high" },
+              },
+            ],
+          },
+        ],
       });
 
-      const content = res.choices[0]?.message?.content || '{"rooms":[],"totalDescription":""}';
-      const parsed = JSON.parse(content);
-      return NextResponse.json({ success: true, rooms: parsed.rooms || [], totalDescription: parsed.totalDescription || "" });
+      const parsed = JSON.parse(
+        res.choices[0]?.message?.content || '{"rooms":[]}'
+      );
+      return NextResponse.json({
+        success: true,
+        rooms: parsed.rooms,
+        totalDescription: parsed.totalDescription,
+      });
     }
 
-    // ── MODE GENERATE : one room image ────────────────────────────
+    // MODE GENERATE
     if (mode === "generate") {
-      const basePrompt = ROOM_PROMPTS[roomType] || ROOM_PROMPTS.default;
-      const styleMod = STYLE_MODIFIERS[style] || STYLE_MODIFIERS.moderne;
-      const descPart = roomDescription ? `Caractéristiques : ${roomDescription}.` : "";
+      const styleDesc = STYLE_MODIFIERS[style] || STYLE_MODIFIERS.moderne;
 
-      const prompt = `${basePrompt}, ${styleMod}. ${descPart} Rendu photoréaliste qualité magazine immobilier haut de gamme, éclairage professionnel HDR, 8K.`;
+      const architectureContext = roomArchitecture
+        ? `ARCHITECTURE RÉELLE DE CETTE PIÈCE (respecter absolument) : ${roomArchitecture}. `
+        : "";
+
+      const roomContext = roomDescription
+        ? `Caractéristiques complémentaires : ${roomDescription}. `
+        : "";
+
+      const prompt = `Photographie d'architecture intérieure professionnelle, rendu photoréaliste qualité magazine (Architectural Digest, Elle Décoration).
+
+${architectureContext}${roomContext}
+
+PIÈCE : ${roomName}.
+STYLE DE DÉCORATION : ${styleDesc}.
+
+Respecte impérativement la géométrie de la pièce : si 2 fenêtres sur un mur, montre-les ; si grande pièce lumineuse, traduis-le par une lumière naturelle abondante ; si petite surface, montre une perspective adaptée. Éclairage naturel réaliste depuis les fenêtres décrites. Mobilier adapté à la surface réelle. Vue grand angle depuis un coin montrant la volumétrie réelle. Pas de texte, pas de personnes, pas de logo.`;
 
       const imageRes = await openai.images.generate({
         model: "dall-e-3",
@@ -81,17 +113,37 @@ Maximum 6 pièces. N'inclure que les pièces clairement identifiables.`
       });
 
       const generatedUrl = imageRes.data?.[0]?.url;
-      if (!generatedUrl) return NextResponse.json({ error: "Aucune image générée" }, { status: 500 });
+      if (!generatedUrl)
+        return NextResponse.json(
+          { error: "Aucune image générée" },
+          { status: 500 }
+        );
 
-      return NextResponse.json({ success: true, imageUrl: generatedUrl, roomName, roomType });
+      return NextResponse.json({
+        success: true,
+        imageUrl: generatedUrl,
+        roomName,
+        roomType,
+      });
     }
 
-    return NextResponse.json({ error: "Mode invalide. Utilisez 'analyze' ou 'generate'." }, { status: 400 });
-
+    return NextResponse.json({ error: "Mode invalide" }, { status: 400 });
   } catch (error: any) {
-    console.error("Decorate error:", error);
-    if (error?.status === 429) return NextResponse.json({ error: "Trop de requêtes. Réessayez dans quelques secondes." }, { status: 429 });
-    if (error?.status === 400) return NextResponse.json({ error: "L'IA n'a pas pu traiter cette requête." }, { status: 400 });
-    return NextResponse.json({ error: "Erreur serveur lors de la génération" }, { status: 500 });
+    console.error("Decorate API error:", error);
+    if (error?.status === 429)
+      return NextResponse.json(
+        { error: "Quota OpenAI dépassé. Veuillez réessayer dans quelques instants." },
+        { status: 429 }
+      );
+    if (error?.status === 400)
+      return NextResponse.json(
+        { error: "Contenu refusé par le filtre OpenAI." },
+        { status: 400 }
+      );
+    return NextResponse.json(
+      { error: "Erreur serveur interne." },
+      { status: 500 }
+    );
   }
 }
+
