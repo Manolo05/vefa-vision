@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback, useRef } from "react";
-import { Upload, Sparkles, Download, RotateCcw, Building2, Loader2, CheckCircle2, AlertCircle, FileText, Mail, Home, X } from "lucide-react";
+import { Upload, Sparkles, Download, RotateCcw, Building2, Loader2, CheckCircle2, AlertCircle, FileText, Mail, X } from "lucide-react";
 
 type Step = "upload" | "uploading" | "uploaded" | "analyzing" | "generating" | "done" | "error";
 type Style = "moderne" | "luxe" | "scandinave" | "minimaliste";
@@ -578,4 +578,4 @@ export default function Home() {
       </footer>
     </div>
   );
-    }
+  }
