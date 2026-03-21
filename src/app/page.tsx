@@ -17,7 +17,7 @@ interface RoomImage {
 }
 
 const STYLES: { id: Style; label: string; icon: string; desc: string }[] = [
-  { id: "moderne", label: "Moderne", icon: "■", desc: "Lignes épurées, tons neutres, accents design" },
+  { id: "moderne", label: "Moderne", icon", ", desc: "Lignes épurées, tons neutres, accents design" },
   { id: "luxe", label: "Luxe", icon: "✦", desc: "Marbre, velours, dorures, cristal" },
   { id: "scandinave", label: "Scandinave", icon: "△", desc: "Bois clair, blanc, chaleureux" },
   { id: "minimaliste", label: "Minimaliste", icon: "○", desc: "Vide élégant, matériaux bruts" },
@@ -73,7 +73,7 @@ async function pdfToImageFile(file: File): Promise<File> {
     canvas.toBlob((blob) => {
       if (!blob) return reject(new Error("Conversion PDF échouée"));
       resolve(
-        new File([blob], file.name.replace(/\.pdf$/i, ".png"), { type: "image/png" })
+        new File([blob], file.name.replace(/\\.pdf$/i, ".png"), { type: "image/png" })
       );
     }, "image/png");
   });
@@ -164,7 +164,7 @@ export default function Home() {
 
       const detectedType = analyzeData.propertyType || "appartement";
       setPropertyType(detectedType);
-      setTotalSurface(analyzeData.totalSurface || "");
+      se setTotalSurface(analyzeData.totalSurface || "");
       setTotalDescription(analyzeData.totalDescription || "");
 
       setRoomImages(
@@ -264,9 +264,9 @@ export default function Home() {
       if (shareEmail.trim()) {
         const subject = encodeURIComponent("Home Staging IA - VEFA Vision");
         const body = encodeURIComponent(
-          "Bonjour,\n\nVeuillez trouver ci-joint le PDF de home staging généré par VEFA Vision pour votre " +
+          "Bonjour,\\n\\nVeuillez trouver ci-joint le PDF de home staging généré par VEFA Vision pour votre " +
             (propertyType === "maison" ? "maison" : "appartement") +
-            ".\n\nCordialement"
+            ".\\n\\nCordialement"
         );
         window.open(`mailto:${shareEmail.trim()}?subject=${subject}&body=${body}`);
       }
@@ -578,4 +578,4 @@ export default function Home() {
       </footer>
     </div>
   );
-      }
+        }
