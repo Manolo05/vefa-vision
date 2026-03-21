@@ -46,8 +46,8 @@ Cadrage : vue grand angle en légère plongée depuis un coin de la pièce, lumi
       style: "natural",
     });
 
-    const generatedUrl = imageResponse.data[0]?.url;
-    if (!generatedUrl) {
+        const generatedUrl = imageResponse.data?.[0]?.url; 
+        if (!generatedUrl) {    
       return NextResponse.json({ error: "Aucune image générée par l'IA" }, { status: 500 });
     }
 
