@@ -18,7 +18,7 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "openai": "^4.52.0",
-    "replicate": "^0.33.4",
+    "replicate": "^1.4.0",
     "sharp": "^0.33.4",
     "lucide-react": "^0.424.0"
   },
