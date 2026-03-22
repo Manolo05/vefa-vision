@@ -2,12 +2,29 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**.supabase.co" },
-      { protocol: "https", hostname: "oaidalleapiprodscus.blob.core.windows.net" },
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "oaidalleapiprodscus.blob.core.windows.net",
+      },
+      {
+        protocol: "https",
+        hostname: "replicate.delivery",
+      },
+      {
+        protocol: "https",
+        hostname: "pbxt.replicate.delivery",
+      },
     ],
   },
   experimental: {
-    serverActions: { bodySizeLimit: "15mb" },
+    serverActions: {
+      bodySizeLimit: "15mb",
+    },
   },
 };
+
 export default nextConfig;
