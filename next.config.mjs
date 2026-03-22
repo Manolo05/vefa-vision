@@ -20,6 +20,7 @@ const nextConfig = {
       },
     ],
   },
+  serverExternalPackages: ["sharp", "pdf-parse"],
   experimental: {
     serverActions: {
       bodySizeLimit: "15mb",
