@@ -4,7 +4,16 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface Room {
   name: string;
-  type: "salon" | "chambre" | "cuisine" | "sdb" | "wc" | "hall" | "bureau" | "dressing" | "autre";
+  type:
+    | "salon"
+    | "chambre"
+    | "cuisine"
+    | "sdb"
+    | "wc"
+    | "hall"
+    | "bureau"
+    | "dressing"
+    | "autre";
   width: number;
   length: number;
   area: number;
@@ -42,30 +51,27 @@ export async function analyzePlanWithVision(
           },
           {
             type: "text",
-            text: `Tu es un expert en lecture de plans architecturaux immobiliers.
-Analyse ce plan d'appartement/maison et extrais TOUTES les informations avec la PRECISION MAXIMALE.
-
-Retourne UNIQUEMENT un JSON valide respectant exactement ce schema :
+            text: `You are an expert architectural floor plan reader. Analyze this apartment/house floor plan and extract ALL information with MAXIMUM PRECISION.
+Return ONLY valid JSON matching exactly this schema:
 {
-  "totalArea": <surface totale en m2>,
+  "totalArea": <total area in m2>,
   "typology": "<T1|T2|T3|T4|T5>",
-  "orientation": "<N|S|E|W|NE|NW|SE|SW|Inconnue>",
-  "confidence": <0.0 a 1.0>,
+  "orientation": "<N|S|E|W|NE|NW|SE|SW|Unknown>",
+  "confidence": <0.0 to 1.0>,
   "rooms": [
     {
-      "name": "<nom exact sur le plan>",
+      "name": "<exact name on plan>",
       "type": "<salon|chambre|cuisine|sdb|wc|hall|bureau|dressing|autre>",
-      "width": <largeur en metres, 2 decimales>,
-      "length": <longueur en metres, 2 decimales>,
-      "area": <surface en m2, 2 decimales>,
+      "width": <width in meters, 2 decimal places>,
+      "length": <length in meters, 2 decimal places>,
+      "area": <area in m2, 2 decimal places>,
       "position": { "x": <0-100>, "y": <0-100> },
       "doors": [{ "wall": "<N|S|E|W>", "position": <0.0-1.0> }],
-      "windows": [{ "wall": "<N|S|E|W>", "position": <0.0-1.0>, "width": <metres> }]
+      "windows": [{ "wall": "<N|S|E|W>", "position": <0.0-1.0>, "width": <meters> }]
     }
   ]
 }
-
-REGLES : utilise les dimensions exactes si visibles. position x/y = coin haut-gauche (0=haut-gauche, 100=bas-droite).`,
+RULES: use exact dimensions if visible. position x/y = top-left corner of room (0=top-left, 100=bottom-right).`,
           },
         ],
       },
@@ -74,18 +80,21 @@ REGLES : utilise les dimensions exactes si visibles. position x/y = coin haut-ga
   });
 
   const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("GPT-4o Vision n'a pas retourne de reponse");
+  if (!content) throw new Error("GPT-4o Vision returned no response");
 
   const parsed = JSON.parse(content) as FloorPlan & { rawText?: string };
   parsed.rawText = content;
+
   parsed.rooms = parsed.rooms.map((room) => ({
     ...room,
     area:
-      Math.abs(room.area - room.width * room.length) > room.width * room.length * 0.1
+      Math.abs(room.area - room.width * room.length) >
+      room.width * room.length * 0.1
         ? parseFloat((room.width * room.length).toFixed(2))
         : room.area,
     doors: room.doors || [],
     windows: room.windows || [],
   }));
+
   return parsed;
 }
