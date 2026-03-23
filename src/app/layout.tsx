@@ -10,22 +10,18 @@ export const metadata: Metadata = {
   description: "SaaS Immobilier IA — Home Staging, Brief Commercial, CRM, PDF",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
       <body className={inter.className}>
         <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
-            <Link href="/" className="flex items-center gap-2 text-white font-bold text-lg">
+            <Link href="/" className="flex items-center gap-2 text-white font-bold text-lg hover:opacity-80 transition-opacity">
               <span className="text-[#C9A96E] text-2xl">⬡</span>
-              VEFA Vision
+              <span>VEFA Vision</span>
             </Link>
-            <div className="flex items-center gap-1">
-              <Link href="/" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
+            <div className="flex items-center gap-0.5">
+              <Link href="/home-staging" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
                 <span>🏠</span>
                 <span className="hidden sm:inline">Home Staging</span>
               </Link>
