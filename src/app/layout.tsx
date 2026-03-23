@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VEFA Vision — Home Staging IA",
-  description: "Transformez vos plans VEFA en visuels immersifs grâce à l'IA",
+  title: "VEFA Vision",
+  description: "SaaS Immobilier IA — Home Staging, Brief Commercial, CRM, PDF",
 };
 
 export default function RootLayout({
@@ -16,7 +17,37 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+            <Link href="/" className="flex items-center gap-2 text-white font-bold text-lg">
+              <span className="text-[#C9A96E] text-2xl">⬡</span>
+              VEFA Vision
+            </Link>
+            <div className="flex items-center gap-1">
+              <Link href="/" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
+                <span>🏠</span>
+                <span className="hidden sm:inline">Home Staging</span>
+              </Link>
+              <Link href="/brief" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
+                <span>📋</span>
+                <span className="hidden sm:inline">Brief</span>
+              </Link>
+              <Link href="/clients" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
+                <span>👥</span>
+                <span className="hidden sm:inline">Clients</span>
+              </Link>
+              <Link href="/pdf-tools" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
+                <span>📄</span>
+                <span className="hidden sm:inline">PDF</span>
+              </Link>
+            </div>
+          </div>
+        </nav>
+        <div className="pt-14">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
