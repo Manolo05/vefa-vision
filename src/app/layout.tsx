@@ -17,11 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <link rel="preconnect" href="https://fonts.googleapis.com" />
                         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-                </head>head>
+                </head>
                 <body className={inter.className} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                   {children}
-                </body>body>
-          </html>html>
+                </body>
+          </html>
         );
 }
 
@@ -31,24 +31,24 @@ export function AppNav() {
           <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800">
                 <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
                         <Link href="/" className="flex items-center gap-2 text-white font-bold text-lg hover:opacity-80 transition-opacity">
-                                  <span className="text-2xl" style={{ color: "#C9A96E" }}>⬡</span>span>
-                                  <span>VEFA Vision</span>span>
-                        </Link>Link>
+                                  <span className="text-2xl" style={{ color: "#C9A96E" }}>⬡</span>
+                                  <span>VEFA Vision</span>
+                        </Link>
                         <div className="flex items-center gap-0.5">
                                   <Link href="/home-staging" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                                              <span>🏠</span>span><span className="hidden sm:inline">Home Staging</span>span>
-                                  </Link>Link>
+                                              <span>🏠</span><span className="hidden sm:inline">Home Staging</span>
+                                  </Link>
                                   <Link href="/brief" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                                              <span>📋</span>span><span className="hidden sm:inline">Brief</span>span>
-                                  </Link>Link>
+                                              <span>📋</span><span className="hidden sm:inline">Brief</span>
+                                  </Link>
                                   <Link href="/clients" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                                              <span>👥</span>span><span className="hidden sm:inline">Clients</span>span>
-                                  </Link>Link>
+                                              <span>👥</span><span className="hidden sm:inline">Clients</span>
+                                  </Link>
                                   <Link href="/pdf-tools" className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all">
-                                              <span>📄</span>span><span className="hidden sm:inline">PDF</span>span>
-                                  </Link>Link>
-                        </div>div>
-                </div>div>
-          </nav>nav>
+                                              <span>📄</span><span className="hidden sm:inline">PDF</span>
+                                  </Link>
+                        </div>
+                </div>
+          </nav>
         );
 }</html>
