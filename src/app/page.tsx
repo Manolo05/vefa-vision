@@ -304,7 +304,7 @@ export default function LandingPage() {
                                                             4 modules, <span className="grad-gold">une seule plateforme</span>
                                               </h2>
                                               <p className="text-zinc-400 max-w-xl mx-auto">Chaque module est conçu pour maximiser votre productivité et vos ventes VEFA.</p>
-                                  </Anim>Anim>
+                                  </Anim>
                         
                                   <div className="grid md:grid-cols-2 gap-6">
                                     {MODULES.map((m, i) => (
@@ -323,7 +323,7 @@ export default function LandingPage() {
                                                                                   </div>
                                                             </div>
                                           </div>
-                          </Anim>Anim>
+                          </Anim>
                         ))}
                                   </div>
                         </div>
@@ -337,7 +337,7 @@ export default function LandingPage() {
                                                             Pourquoi choisir <span className="grad-gold">VEFA Vision</span> ?
                                               </h2>
                                               <p className="text-zinc-400 max-w-xl mx-auto">Des outils pensés par et pour les professionnels de l&apos;immobilier neuf.</p>
-                                  </Anim>Anim>
+                                  </Anim>
                         
                                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
                                     {FEATURES.map((f, i) => (
@@ -347,7 +347,7 @@ export default function LandingPage() {
                                           </div>
                                           <h3 className="font-semibold text-lg mb-2 text-white" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>{f.title}</h3>
                                           <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
-                          </Anim>Anim>
+                          </Anim>
                         ))}
                                   </div>
                         </div>
@@ -361,7 +361,7 @@ export default function LandingPage() {
                                                             Des tarifs <span className="grad-gold">transparents</span>
                                               </h2>
                                               <p className="text-zinc-400 max-w-xl mx-auto">Choisissez le plan adapté à votre activité. Sans engagement.</p>
-                                  </Anim>Anim>
+                                  </Anim>
                         
                                   <div className="grid md:grid-cols-3 gap-6">
                                     {PLANS.map((plan, i) => (
@@ -412,7 +412,7 @@ export default function LandingPage() {
                                                               {plan.cta} <IconArrowSm />
                                                             </Link>
                                           </div>
-                          </Anim>Anim>
+                          </Anim>
                         ))}
                                   </div>
                         </div>
@@ -438,6 +438,6 @@ export default function LandingPage() {
                                   </div>
                         </div>
                 </footer>
-          </>>
+          </>
         );
-}</></div>
+}
