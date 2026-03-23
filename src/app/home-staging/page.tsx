@@ -17,27 +17,27 @@ interface RoomImage {
 }
 
 const STYLES: { id: Style; label: string; icon: string; desc: string }[] = [
-  { id: "moderne", label: "Moderne", icon: "â ", desc: "Lignes Ã©purÃ©es, tons neutres, accents design" },
-  { id: "luxe", label: "Luxe", icon: "â¦", desc: "Marbre, velours, dorures, cristal" },
-  { id: "scandinave", label: "Scandinave", icon: "â³", desc: "Bois clair, blanc, chaleureux" },
-  { id: "minimaliste", label: "Minimaliste", icon: "â", desc: "Vide Ã©lÃ©gant, matÃ©riaux bruts" },
+  { id: "moderne", label: "Moderne", icon: "■", desc: "Lignes épurées, tons neutres, accents design" },
+  { id: "luxe", label: "Luxe", icon: "✦", desc: "Marbre, velours, dorures, cristal" },
+  { id: "scandinave", label: "Scandinave", icon: "△", desc: "Bois clair, blanc, chaleureux" },
+  { id: "minimaliste", label: "Minimaliste", icon: "○", desc: "Vide élégant, matériaux bruts" },
 ];
 
 const ROOM_ICONS: Record<string, string> = {
-  salon: "ðï¸",
-  sejour: "ðï¸",
-  salle_a_manger: "ð½ï¸",
-  cuisine: "ð³",
-  chambre: "ðï¸",
-  salle_de_bain: "ð¿",
-  bureau: "ð¼",
-  entree: "ðª",
-  dressing: "ð",
-  wc: "ð½",
-  cellier: "ð¦",
-  terrasse: "ð¿",
-  garage: "ð",
-  autre: "ð ",
+  salon: "🛋️",
+  sejour: "🛋️",
+  salle_a_manger: "🍽️",
+  cuisine: "🍳",
+  chambre: "🛏️",
+  salle_de_bain: "🚿",
+  bureau: "💼",
+  entree: "🚪",
+  dressing: "👗",
+  wc: "🚽",
+  cellier: "📦",
+  terrasse: "🌿",
+  garage: "🚗",
+  autre: "🏠",
 };
 
 async function loadPdfJs(): Promise<any> {
@@ -71,7 +71,7 @@ async function pdfToImageFile(file: File): Promise<File> {
   await page.render({ canvasContext: context, viewport }).promise;
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
-      if (!blob) return reject(new Error("Conversion PDF Ã©chouÃ©e"));
+      if (!blob) return reject(new Error("Conversion PDF échouée"));
       resolve(
         new File([blob], file.name.replace(/\\.pdf$/i, ".png"), { type: "image/png" })
       );
@@ -160,7 +160,7 @@ export default function Home() {
         dimensions?: string;
       }[] = analyzeData.rooms || [];
       if (rooms.length === 0)
-        throw new Error("Aucune piÃ¨ce dÃ©tectÃ©e dans ce plan");
+        throw new Error("Aucune pièce détectée dans ce plan");
 
       const detectedType = analyzeData.propertyType || "appartement";
       setPropertyType(detectedType);
@@ -200,7 +200,7 @@ export default function Home() {
             }),
           });
           const genData = await genRes.json();
-          if (!genRes.ok) throw new Error(genData.error || "Erreur gÃ©nÃ©ration");
+          if (!genRes.ok) throw new Error(genData.error || "Erreur génération");
           setRoomImages((prev) =>
             prev.map((ri, idx) =>
               idx === i ? { ...ri, imageUrl: genData.imageUrl, status: "done" } : ri
@@ -246,7 +246,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok || !data.pdfBase64) throw new Error(data.error || "Erreur PDF");
 
-      // TÃ©lÃ©charger le PDF
+      // Télécharger le PDF
       const byteArray = Uint8Array.from(atob(data.pdfBase64), (c) =>
         c.charCodeAt(0)
       );
@@ -264,7 +264,7 @@ export default function Home() {
       if (shareEmail.trim()) {
         const subject = encodeURIComponent("Home Staging IA - VEFA Vision");
         const body = encodeURIComponent(
-          "Bonjour,\\n\\nVeuillez trouver ci-joint le PDF de home staging gÃ©nÃ©rÃ© par VEFA Vision pour votre " +
+          "Bonjour,\\n\\nVeuillez trouver ci-joint le PDF de home staging généré par VEFA Vision pour votre " +
             (propertyType === "maison" ? "maison" : "appartement") +
             ".\\n\\nCordialement"
         );
@@ -281,8 +281,8 @@ export default function Home() {
 
   const propertyBadge =
     propertyType === "maison"
-      ? { label: "Maison", icon: "ð¡", color: "text-emerald-400 border-emerald-800 bg-emerald-950" }
-      : { label: "Appartement", icon: "ð¢", color: "text-blue-400 border-blue-800 bg-blue-950" };
+      ? { label: "Maison", icon: "🏡", color: "text-emerald-400 border-emerald-800 bg-emerald-950" }
+      : { label: "Appartement", icon: "🏢", color: "text-blue-400 border-blue-800 bg-blue-950" };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
@@ -300,7 +300,7 @@ export default function Home() {
               </button>
             </div>
             <p className="text-zinc-400 text-sm mb-4">
-              Le PDF sera tÃ©lÃ©chargÃ© sur votre appareil, puis votre client mail s'ouvrira pour l'envoyer.
+              Le PDF sera téléchargé sur votre appareil, puis votre client mail s'ouvrira pour l'envoyer.
             </p>
             <div className="mb-4">
               <label className="text-xs text-zinc-500 uppercase tracking-widest mb-2 block">Adresse email du destinataire</label>
@@ -323,9 +323,9 @@ export default function Home() {
                 disabled={isSharing}
                 className="flex-1 py-3 bg-[#C9A96E] hover:bg-[#b8935a] disabled:opacity-50 text-zinc-950 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2">
                 {isSharing ? (
-                  <><Loader2 size={16} className="animate-spin" /> GÃ©nÃ©ration PDF...</>
+                  <><Loader2 size={16} className="animate-spin" /> Génération PDF...</>
                 ) : (
-                  <><Mail size={16} /> TÃ©lÃ©charger et envoyer</>
+                  <><Mail size={16} /> Télécharger et envoyer</>
                 )}
               </button>
             </div>
@@ -338,14 +338,14 @@ export default function Home() {
           <Building2 size={28} className="text-[#C9A96E]" />
           <div>
             <h1 className="text-xl font-bold tracking-tight">VEFA Vision</h1>
-            <p className="text-xs text-zinc-500">Home Staging IA â par piÃ¨ce</p>
+            <p className="text-xs text-zinc-500">Home Staging IA — par pièce</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {(step === "generating" || step === "done") && (
             <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${propertyBadge.color}`}>
               <span>{propertyBadge.icon}</span> {propertyBadge.label}
-              {totalSurface && <span className="opacity-70 ml-1">Â· {totalSurface}</span>}
+              {totalSurface && <span className="opacity-70 ml-1">· {totalSurface}</span>}
             </span>
           )}
           {(step === "uploaded" || step === "generating" || step === "done") && (
@@ -363,10 +363,10 @@ export default function Home() {
           <div className="animate-fadeIn">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold mb-3">
-                Visualisez chaque piÃ¨ce <span className="text-[#C9A96E]">dÃ©corÃ©e</span>
+                Visualisez chaque pièce <span className="text-[#C9A96E]">décorée</span>
               </h2>
               <p className="text-zinc-400 text-lg">
-                Importez votre plan VEFA â chaque piÃ¨ce est analysÃ©e et dÃ©corÃ©e fidÃ¨lement Ã  son architecture
+                Importez votre plan VEFA — chaque pièce est analysée et décorée fidèlement à son architecture
               </p>
             </div>
             <div
@@ -381,7 +381,7 @@ export default function Home() {
                 <div className="flex flex-col items-center gap-4">
                   <Upload size={48} className="text-zinc-600 group-hover:text-[#C9A96E] transition-colors" />
                   <div>
-                    <p className="text-xl font-semibold mb-1">DÃ©posez votre plan ici</p>
+                    <p className="text-xl font-semibold mb-1">Déposez votre plan ici</p>
                     <p className="text-zinc-500">
                       PNG, JPG, WEBP ou <span className="text-[#C9A96E] font-medium">PDF</span>
                     </p>
@@ -408,16 +408,16 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 size={18} className="text-green-400" />
-                  <span className="text-green-400 font-medium">Plan chargÃ©</span>
+                  <span className="text-green-400 font-medium">Plan chargé</span>
                 </div>
                 <p className="text-zinc-400 text-sm">
-                  L'IA va analyser chaque piÃ¨ce, dÃ©tecter le type de bien et gÃ©nÃ©rer une image fidÃ¨le Ã  son architecture rÃ©elle
+                  L'IA va analyser chaque pièce, détecter le type de bien et générer une image fidèle à son architecture réelle
                 </p>
               </div>
             </div>
             <div className="mb-8">
               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-                Style de dÃ©coration
+                Style de décoration
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {STYLES.map((s) => (
@@ -439,7 +439,7 @@ export default function Home() {
             <button
               onClick={handleDecorate}
               className="w-full py-4 bg-[#C9A96E] hover:bg-[#b8935a] text-zinc-950 font-bold text-lg rounded-xl transition-all flex items-center justify-center gap-3">
-              <Sparkles size={22} /> Analyser et dÃ©corer chaque piÃ¨ce
+              <Sparkles size={22} /> Analyser et décorer chaque pièce
             </button>
           </div>
         )}
@@ -447,9 +447,9 @@ export default function Home() {
         {step === "analyzing" && (
           <div className="animate-fadeIn text-center py-16">
             <Loader2 size={56} className="text-[#C9A96E] animate-spin mx-auto mb-6" />
-            <h3 className="text-2xl font-bold mb-3">Analyse architecturale en coursâ¦</h3>
+            <h3 className="text-2xl font-bold mb-3">Analyse architecturale en cours…</h3>
             <p className="text-zinc-400">
-              GPT-4o identifie chaque piÃ¨ce, le type de bien, les dimensions et les fenÃªtres
+              GPT-4o identifie chaque pièce, le type de bien, les dimensions et les fenêtres
             </p>
           </div>
         )}
@@ -460,11 +460,11 @@ export default function Home() {
               <div>
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <h3 className="text-xl font-bold">
-                    {step === "done" ? "Toutes les piÃ¨ces gÃ©nÃ©rÃ©es â" : "GÃ©nÃ©ration en coursâ¦"}
+                    {step === "done" ? "Toutes les pièces générées ✓" : "Génération en cours…"}
                   </h3>
                   <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium ${propertyBadge.color}`}>
                     {propertyBadge.icon} {propertyBadge.label}
-                    {totalSurface && <span className="opacity-70 ml-1">Â· {totalSurface}</span>}
+                    {totalSurface && <span className="opacity-70 ml-1">· {totalSurface}</span>}
                   </span>
                 </div>
                 {totalDescription && (
@@ -516,7 +516,7 @@ export default function Home() {
                     ) : room.status === "generating" ? (
                       <div className="flex flex-col items-center justify-center h-full gap-3">
                         <Loader2 size={32} className="text-[#C9A96E] animate-spin" />
-                        <p className="text-sm text-zinc-400">GÃ©nÃ©ration en coursâ¦</p>
+                        <p className="text-sm text-zinc-400">Génération en cours…</p>
                       </div>
                     ) : room.status === "error" ? (
                       <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
@@ -525,14 +525,14 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full gap-2">
-                        <div className="text-3xl opacity-30">{ROOM_ICONS[room.roomType] || "ð "}</div>
-                        <p className="text-xs text-zinc-600">En attenteâ¦</p>
+                        <div className="text-3xl opacity-30">{ROOM_ICONS[room.roomType] || "🏠"}</div>
+                        <p className="text-xs text-zinc-600">En attente…</p>
                       </div>
                     )}
                   </div>
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{ROOM_ICONS[room.roomType] || "ð "}</span>
+                      <span className="text-lg">{ROOM_ICONS[room.roomType] || "🏠"}</span>
                       <span className="font-semibold text-sm">{room.roomName}</span>
                       {room.roomDimensions && (
                         <span className="text-xs text-[#C9A96E] ml-auto">{room.roomDimensions}</span>
@@ -567,14 +567,14 @@ export default function Home() {
             <button
               onClick={reset}
               className="px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-medium transition-all">
-              <RotateCcw size={16} className="inline mr-2" /> RÃ©essayer
+              <RotateCcw size={16} className="inline mr-2" /> Réessayer
             </button>
           </div>
         )}
       </main>
 
       <footer className="border-t border-zinc-800 px-6 py-3 text-center text-xs text-zinc-600">
-        VEFA Vision v3.0 â Powered by OpenAI
+        VEFA Vision v3.0 — Powered by OpenAI
       </footer>
     </div>
   );
