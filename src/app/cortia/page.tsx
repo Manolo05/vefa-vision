@@ -584,7 +584,7 @@ function DossierPage({ d, tab, setTab, onUpdate, onAnalyse, onSynthese, aiLoadin
                   ].map((r, i) => (
                     <div key={i} style={{ background: C.white, borderRadius: 10, padding: '12px 14px', border: '1px solid ' + C.ink08, boxShadow: 'inset 3px 0 0 ' + (r.ok === 'good' ? C.em : r.ok === 'warn' ? C.am : r.ok === 'bad' ? C.rd : C.ink15) }}>
                       <div style={{ fontSize: 10, color: C.ink30, marginBottom: 2 }}>{r.l}</div>
-                      <div style={{ fontSize: 15, fontWeight: 600 }}>{r.v}</div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#0f0f12' }}>{r.v}</div>
                     </div>
                   ))}
                 </div>
@@ -597,7 +597,7 @@ function DossierPage({ d, tab, setTab, onUpdate, onAnalyse, onSynthese, aiLoadin
                   ].map((r, i) => (
                     <div key={i} style={{ background: C.white, borderRadius: 10, padding: '12px 14px', border: '1px solid ' + C.ink08 }}>
                       <div style={{ fontSize: 10, color: C.ink30, marginBottom: 2 }}>{r.l}</div>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>{r.v}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f0f12' }}>{r.v}</div>
                     </div>
                   ))}
                 </div>
