@@ -582,7 +582,7 @@ function DossierPage({ d, tab, setTab, onUpdate, onAnalyse, onSynthese, aiLoadin
                     { l: 'Ratio apport', v: a.ratioApp + '%', ok: a.ratioApp >= 15 ? 'good' : a.ratioApp >= 5 ? 'warn' : 'bad' },
                     { l: 'Mensualite', v: a.mens + ' EUR', ok: 'neutral' },
                   ].map((r, i) => (
-                    <div key={i} style={{ background: C.white, borderRadius: 10, padding: '12px 14px', borderLeft: '3px solid ' + (r.ok === 'good' ? C.em : r.ok === 'warn' ? C.am : r.ok === 'bad' ? C.rd : C.ink08), border: '1px solid ' + C.ink08 }}>
+                    <div key={i} style={{ background: C.white, borderRadius: 10, padding: '12px 14px', border: '1px solid ' + C.ink08, boxShadow: 'inset 3px 0 0 ' + (r.ok === 'good' ? C.em : r.ok === 'warn' ? C.am : r.ok === 'bad' ? C.rd : C.ink15) }}>
                       <div style={{ fontSize: 10, color: C.ink30, marginBottom: 2 }}>{r.l}</div>
                       <div style={{ fontSize: 15, fontWeight: 600 }}>{r.v}</div>
                     </div>
