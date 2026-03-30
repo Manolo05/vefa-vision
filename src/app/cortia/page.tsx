@@ -513,7 +513,7 @@ function DossierPage({ d, tab, setTab, onUpdate, onAnalyse, onSynthese, aiLoadin
           </div>
         )}
         {tab === 'documents' && <DocumentsTab d={d} onUpdate={onUpdate} />}
-        {tab === 'synthese' && <SyntheseTab d={d} onSynthese={onSynthese} aiLoading={aiLoading} />}
+        {tab === 'synthese' && <SyntheseTab dossier={d} onUpdateDossier={onUpdate} />}
       </div>
     </div>
   );
