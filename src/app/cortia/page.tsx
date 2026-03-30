@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 const C: Record<string, string> = {
   ink: '#0f0f12', ink90: '#1a1a21', ink70: '#2e2e38', ink50: '#52525e',
@@ -60,7 +60,7 @@ interface Analyse {
   saut: number; score: number; notaire: number;
   forces: string[]; faiblesses: string[]; recos: string[];
 }
-interface Document {
+interface DocFichier {
   id: string; nom: string; categorie: string;
   taille: number; type_mime: string; date_upload: string;
   donnees_extraites?: Record<string, string | number>;
@@ -82,7 +82,7 @@ interface Dossier {
   score: number | null; createdAt: string; updatedAt: string;
   analyse: Analyse | null; synthese: SyntheseStructuree | null;
   emp: Emprunteur; proj: Projet; charges: Charge[];
-  documents: Document[];
+  documents: DocFichier[];
 }
 
 function loadData<T>(key: string, fallback: T): T {
@@ -538,7 +538,7 @@ function DocumentsTab({ d, onUpdate }: { d: Dossier; onUpdate: (u: Partial<Dossi
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setUploading(selectedCat);
-    const newDocs: Document[] = [];
+    const newDocs: DocFichier[] = [];
     for (const file of Array.from(files)) {
       if (file.size > 10 * 1024 * 1024) { alert('Fichier trop lourd (max 10MB) : ' + file.name); continue; }
       const base64 = await new Promise<string>((resolve) => {
@@ -546,7 +546,7 @@ function DocumentsTab({ d, onUpdate }: { d: Dossier; onUpdate: (u: Partial<Dossi
         reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
         reader.readAsDataURL(file);
       });
-      const doc: Document = {
+      const doc: DocFichier = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 4),
         nom: file.name, categorie: selectedCat,
         taille: file.size, type_mime: file.type,
@@ -680,31 +680,31 @@ function SyntheseTab({ dossier, onUpdateDossier }: { dossier: Dossier; onUpdateD
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Erreur serveur' }));
-        throw new Error(err.error || 'Erreur serveur');
+        throw new Error((err as { error: string }).error || 'Erreur serveur');
       }
-      const data = await res.json();
+      const data = await res.json() as SyntheseStructuree;
       const updated: Dossier = {
         ...dossier,
-        synthese: { ...data, generatedAt: new Date().toISOString() },
+        synthese: { ...data, generated_at: new Date().toISOString() },
         updatedAt: new Date().toISOString(),
       };
       onUpdateDossier(updated);
-    } catch (e: any) {
-      setError(e.message || 'Erreur inconnue');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
   }
 
   function copierNote() {
-    if (!synthese?.noteBancaire) return;
-    navigator.clipboard.writeText(synthese.noteBancaire).then(() => {
+    if (!synthese?.note_bancaire) return;
+    navigator.clipboard.writeText(synthese.note_bancaire).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
-  const sectionCard = (title: string, color: string, icon: string, children: React.ReactNode) => (
+  const sectionCard = (title: string, icon: string, children: React.ReactNode) => (
     <div style={{ background: C.surface, border: '1px solid ' + C.border, borderRadius: 12, padding: 20, marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <span style={{ fontSize: 18 }}>{icon}</span>
@@ -730,14 +730,14 @@ function SyntheseTab({ dossier, onUpdateDossier }: { dossier: Dossier; onUpdateD
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>Synthèse bancaire IA</h2>
-          {synthese?.generatedAt && (
+          {synthese?.generated_at && (
             <span style={{ fontSize: 12, color: C.muted, marginTop: 4, display: 'block' }}>
-              Générée le {new Date(synthese.generatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              Générée le {new Date(synthese.generated_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          {synthese?.noteBancaire && (
+          {synthese?.note_bancaire && (
             <button onClick={copierNote} style={{ fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 8, border: '1px solid ' + C.border, background: C.surface, color: C.text, cursor: 'pointer' }}>
               {copied ? '✓ Copié !' : '📋 Copier la note'}
             </button>
@@ -747,7 +747,7 @@ function SyntheseTab({ dossier, onUpdateDossier }: { dossier: Dossier; onUpdateD
             disabled={loading}
             style={{ fontSize: 13, fontWeight: 700, padding: '8px 18px', borderRadius: 8, border: 'none', background: loading ? C.border : C.accent, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            {loading ? '⏳ Génération en cours...' : synthese ? '🔄 Regénérer' : '✨ Générer la synthèse complète'}
+            {loading ? '⏳ Génération...' : synthese ? '🔄 Regénérer' : '✨ Générer la synthèse'}
           </button>
         </div>
       </div>
@@ -770,7 +770,7 @@ function SyntheseTab({ dossier, onUpdateDossier }: { dossier: Dossier; onUpdateD
         <div style={{ textAlign: 'center', padding: 60, background: C.surface, borderRadius: 16, border: '2px dashed ' + C.border }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
           <div style={{ fontWeight: 700, fontSize: 18, color: C.text, marginBottom: 8 }}>Aucune synthèse générée</div>
-          <div style={{ fontSize: 14, color: C.muted, marginBottom: 24 }}>Cliquez sur "Générer la synthèse complète" pour obtenir une analyse bancaire IA structurée en 6 sections</div>
+          <div style={{ fontSize: 14, color: C.muted, marginBottom: 24 }}>Cliquez pour obtenir une analyse bancaire IA structurée en 6 sections</div>
           <button onClick={generer} style={{ fontSize: 14, fontWeight: 700, padding: '12px 28px', borderRadius: 10, border: 'none', background: C.accent, color: '#fff', cursor: 'pointer' }}>
             ✨ Générer la synthèse
           </button>
@@ -779,40 +779,29 @@ function SyntheseTab({ dossier, onUpdateDossier }: { dossier: Dossier; onUpdateD
 
       {!loading && synthese && (
         <div>
-          {/* Section 1 — Résumé emprunteur */}
-          {synthese.resumeEmprunteur && sectionCard('Résumé emprunteur', C.accent, '👤', (
-            <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>{synthese.resumeEmprunteur}</p>
+          {synthese.resume_emprunteur && sectionCard('Résumé emprunteur', '👤', (
+            <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>{synthese.resume_emprunteur}</p>
           ))}
-
-          {/* Section 2 — Résumé financier */}
-          {synthese.resumeFinancier && sectionCard('Résumé financier', C.accent, '💶', (
-            <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>{synthese.resumeFinancier}</p>
+          {synthese.resume_financier && sectionCard('Résumé financier', '💶', (
+            <p style={{ fontSize: 14, color: C.text, lineHeight: 1.7, margin: 0 }}>{synthese.resume_financier}</p>
           ))}
-
-          {/* Section 3 — Points forts */}
-          {synthese.pointsForts && synthese.pointsForts.length > 0 && sectionCard('Points forts', C.gn, '✅', (
-            tagList(synthese.pointsForts, '#e8f5e9', '#2e7d32')
+          {synthese.points_forts && synthese.points_forts.length > 0 && sectionCard('Points forts', '✅', (
+            tagList(synthese.points_forts, '#e8f5e9', '#2e7d32')
           ))}
-
-          {/* Section 4 — Points de vigilance */}
-          {synthese.pointsVigilance && synthese.pointsVigilance.length > 0 && sectionCard('Points de vigilance', C.rd, '⚠️', (
-            tagList(synthese.pointsVigilance, '#fff3e0', '#e65100')
+          {synthese.points_vigilance && synthese.points_vigilance.length > 0 && sectionCard('Points de vigilance', '⚠️', (
+            tagList(synthese.points_vigilance, '#fff3e0', '#e65100')
           ))}
-
-          {/* Section 5 — Recommandations */}
-          {synthese.recommandations && synthese.recommandations.length > 0 && sectionCard('Recommandations de présentation', C.accent, '💡', (
-            tagList(synthese.recommandations, '#e3f2fd', '#1565c0')
+          {synthese.recommandations_presentation && synthese.recommandations_presentation.length > 0 && sectionCard('Recommandations', '💡', (
+            tagList(synthese.recommandations_presentation, '#e3f2fd', '#1565c0')
           ))}
-
-          {/* Section 6 — Note bancaire premium */}
-          {synthese.noteBancaire && sectionCard('Note bancaire premium', C.accent, '🏦', (
+          {synthese.note_bancaire && sectionCard('Note bancaire premium', '🏦', (
             <div>
               <div style={{ background: C.bg, borderRadius: 8, padding: 16, fontSize: 13, color: C.text, lineHeight: 1.8, whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                {synthese.noteBancaire}
+                {synthese.note_bancaire}
               </div>
-              {synthese.scoreCommentaire && (
+              {synthese.score_commentaire && (
                 <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0f4ff', borderRadius: 8, fontSize: 13, color: C.accent, fontWeight: 600 }}>
-                  📊 {synthese.scoreCommentaire}
+                  📊 {synthese.score_commentaire}
                 </div>
               )}
             </div>
